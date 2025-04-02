@@ -9,7 +9,8 @@ ImageProcessor::ImageProcessor(const std::string& image_path)
       loaded_ok(false),
       original_width(0),
       original_height(0),
-      original_channels(0)
+      original_channels(0),
+      allocator(1024 * 1024 * 10) 
 {
     image_mat = cv::imread(image_path, cv::IMREAD_UNCHANGED);
 
@@ -23,7 +24,7 @@ ImageProcessor::ImageProcessor(const std::string& image_path)
         original_width = image_mat.cols;
         original_height = image_mat.rows;
         original_channels = image_mat.channels();
-
+        
 
         // Asegurarse de que tenga al menos 3 canales (BGR) si es posible
         if (image_mat.channels() == 1) {

@@ -4,6 +4,7 @@
 
 #include <string>
 #include <opencv2/opencv.hpp> // Incluir cabecera principal de OpenCV
+#include "BuddyAllocator.h"
 
 class ImageProcessor {
 private:
@@ -14,7 +15,7 @@ private:
     int original_width;
     int original_height;
     int original_channels;
-
+    BuddyAllocator allocator; //Instancia de Buddy Allocator
 
 public:
     // Constructor: Intenta cargar la imagen desde la ruta
