@@ -7,11 +7,14 @@
 
 class BuddyAllocator {
 public:
+
     BuddyAllocator(size_t totalSize, size_t minBlockSize = 128);
     ~BuddyAllocator();
 
     void* allocate(size_t size);
     void deallocate(void* ptr);
+
+    size_t getUsedMemory() const;
 
 private:
     struct Block {

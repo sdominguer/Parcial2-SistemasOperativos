@@ -124,3 +124,12 @@ void BuddyAllocator::tryCoalesce(void* ptr, int level) {
         current = &((*current)->next);
     }
 }
+
+size_t BuddyAllocator::getUsedMemory() const {
+    size_t usedMemory = 0;
+    for (const auto& pair : allocatedSizes) {
+        usedMemory += getBlockSize(pair.second);
+    }
+    return usedMemory;
+}
+
