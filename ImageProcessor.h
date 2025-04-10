@@ -19,7 +19,7 @@ private:
 
 public:
     // Constructor: Intenta cargar la imagen desde la ruta
-    ImageProcessor(const std::string& image_path);
+    ImageProcessor(const std::string& image_path, BuddyAllocator& allocator);
 
     // Verifica si la imagen se cargó correctamente
     bool isLoaded() const;
