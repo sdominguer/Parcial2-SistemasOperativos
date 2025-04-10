@@ -1,52 +1,70 @@
 // main.cpp
+#include "ImageProcessor.h"   // Incluir nuestra clase Imagen
 #include <iostream>
 #include <string>
-#include <vector>
-#include <limits> // Para limpiar el buffer de entrada
-#include "ImageProcessor.h" // Incluir nuestra clase
+#include <limits>    // Para limpiar buffer de entrada std::numeric_limits
 
-int main(int argc, char* argv[]) {
-    std::cout << "=== PROCESAMIENTO DE IMAGEN (Parte 1 y 2: Carga y Rotación) ===" << std::endl;
+int main() {
+    std::cout << "=== PROCESAMIENTO MANUAL DE IMAGEN (Rotación CCW) ===" << std::endl;
 
-    // --- Procesamiento de argumentos de línea de comandos (Simplificado) ---
-    if (argc < 2) {
-        std::cerr << "Error: Se requiere el nombre del archivo de imagen de entrada." << std::endl;
-        std::cerr << "Uso: " << argv[0] << " <entrada.jpg>" << std::endl;
+    // --- Simulación de Carga (Parte 1) ---
+    const int ANCHO_IMG = 300;
+    const int ALTO_IMG = 200;
+    const int CANALES_IMG = 3; // RGB
+    std::string archivo_salida = "imagen_rotada_final.ppm";
+
+    std::cout << "\n[Paso 1] Creando imagen de ejemplo (" << ANCHO_IMG << "x" << ALTO_IMG << ")...\n";
+    Imagen imagen_original(ANCHO_IMG, ALTO_IMG, CANALES_IMG);
+
+    if (!imagen_original.esValida()) {
+        std::cerr << "Error crítico: No se pudo crear la imagen original. Saliendo." << std::endl;
         return 1;
     }
 
-    std::string input_filename = argv[1];
-    // Nombre de archivo de salida fijo por ahora
-    std::string output_filename = "imagen_rotada.png";
+    // Llenar con un patrón (ej: rojo en la mitad izquierda, verde en la derecha)
+    for (int y = 0; y < imagen_original.getAlto(); ++y) {
+        for (int x = 0; x < imagen_original.getAncho(); ++x) {
+            if (x < imagen_original.getAncho() / 2) {
+                imagen_original.establecerPixel(x, y, 255, 0, 0); // Rojo
+            } else {
+                imagen_original.establecerPixel(x, y, 0, 255, 0); // Verde
+            }
+        }
+    }
+     std::cout << "[Paso 1] Imagen de ejemplo creada y llenada.\n";
+    std::cout << "          Dimensiones: " << imagen_original.getAncho() << "x" << imagen_original.getAlto() << "\n";
 
-    // --- Carga de la Imagen ---
-    ImageProcessor processor(input_filename);
-
-    // Verificar si la carga fue exitosa
-    if (!processor.isLoaded()) {
-        return 1; // El error ya se imprimió
+    // --- Rotación (Parte 2) ---
+    double angulo = 0.0;
+    std::cout << "\n[Paso 2] Introduce el ángulo de rotación (grados, sentido ANTI-HORARIO): ";
+    while (!(std::cin >> angulo)) {
+        std::cerr << "Entrada inválida. Introduce un número: ";
+        std::cin.clear(); // Limpiar flag de error
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Descartar buffer
     }
 
-    // --- Mostrar Información Original ---
-    processor.displayInfo("Información de la Imagen Original");
+    // Llamar al método de rotación
+    Imagen imagen_rotada = imagen_original.rotarCentroCounterClockwise(angulo);
 
-    // --- Pedir Ángulo de Rotación al Usuario ---
-    double rotation_angle = 0.0;
-    std::cout << "Introduce el ángulo de rotación deseado (en grados, sentido horario - clockwise): ";
-    while (!(std::cin >> rotation_angle)) {
-        std::cerr << "Entrada inválida. Por favor, introduce un número para el ángulo: ";
-        std::cin.clear(); // Limpiar el estado de error
-        // Descartar la entrada incorrecta del buffer
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    if (!imagen_rotada.esValida()) {
+        std::cerr << "Error: La operación de rotación falló o devolvió una imagen inválida." << std::endl;
+        // La memoria de imagen_original se libera al salir de main
+        return 1;
+    }
+     std::cout << "[Paso 2] Rotación aplicada.\n";
+     std::cout << "          Dimensiones rotada: " << imagen_rotada.getAncho() << "x" << imagen_rotada.getAlto() << "\n"; // Mismas dimensiones en esta implementación
+
+    // --- Guardado ---
+    std::cout << "\n[Paso 3] Intentando guardar la imagen rotada en '" << archivo_salida << "'...\n";
+    if (imagen_rotada.guardarPPM(archivo_salida)) {
+        std::cout << "[Paso 3] Guardado exitoso. Puedes abrirla con GIMP, IrfanView, etc.\n";
+    } else {
+         std::cerr << "[Paso 3] Fallo al guardar la imagen rotada.\n";
     }
 
-    // --- Rotar la Imagen ---
-    processor.rotateCenterClockwise(rotation_angle);
 
-    // --- Guardar la Imagen Procesada ---
-    processor.saveImage(output_filename);
+    std::cout << "\n=== Procesamiento Finalizado ===\n" << std::endl;
 
-    std::cout << "\n=== Procesamiento Finalizado ===" << std::endl;
-
-    return 0; // Éxito
+    // Los destructores de imagen_original e imagen_rotada se llamarán aquí automáticamente (RAII)
+    return 0;
 }
